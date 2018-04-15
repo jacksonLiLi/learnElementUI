@@ -159,7 +159,7 @@ export default {
             this.popperJS._popper.style.transformOrigin = typeof this.transformOrigin === 'string' ?
                 this.transformOrigin : ['top', 'bottom'].indexOf(placement) > -1 ? `center ${ origin }` : `${ origin } center`;
         },
-
+        // 构造下拉浮动箭头并剔除v- 开头属性
         appendArrow(element) {
             let hash;
             if (this.appended) {
@@ -195,6 +195,7 @@ export default {
     },
 
     // call destroy in keep-alive mode
+    // 解决keepAlive 没销毁问题
     deactivated() {
         this.$options.beforeDestroy[0].call(this);
     }
