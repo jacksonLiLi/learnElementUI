@@ -27,7 +27,8 @@
 // Cross module loader
 // Supported: Node, AMD, Browser globals
 //
-;(function (root, factory) {
+;
+(function(root, factory) {
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         define(factory);
@@ -40,7 +41,7 @@
         // Browser globals (root is window)
         root.Popper = factory();
     }
-}(this, function () {
+}(this, function() {
 
     'use strict';
 
@@ -49,41 +50,49 @@
     // default options
     var DEFAULTS = {
         // placement of the popper
+        // popper 放置位置
         placement: 'bottom',
-
+        // 是否开启GPU加速
         gpuAcceleration: true,
 
         // shift popper from its origin by the given amount of pixels (can be negative)
+        // 偏移值
         offset: 0,
 
         // the element which will act as boundary of the popper
+        // popper 定位边界容器
         boundariesElement: 'viewport',
 
         // amount of pixel used to define a minimum distance between the boundaries and the popper
+        // 距离边界元素距离
         boundariesPadding: 5,
 
         // popper will try to prevent overflow following this order,
         // by default, then, it could overflow on the left and on top of the boundariesElement
+        // 若超出边界，按顺序变化放置位置,左边溢出会变化到右边，顶部溢出会变化到下边
         preventOverflowOrder: ['left', 'right', 'top', 'bottom'],
 
         // the behavior used by flip to change the placement of the popper
+        // 溢出时变化的方式，默认是翻转到溢出相反位置。
         flipBehavior: 'flip',
-
+        // 箭头元素
         arrowElement: '[x-arrow]',
-
+        // 箭头偏移值
         arrowOffset: 0,
 
         // list of functions used to modify the offsets before they are applied to the popper
-        modifiers: [ 'shift', 'offset', 'preventOverflow', 'keepTogether', 'arrow', 'flip', 'applyStyle'],
-
+        // popper以modifier的形式来修改popper的行为，默认暴露了7个modifier，现在是10个。每个modifier都可以修改调整。
+        modifiers: ['shift', 'offset', 'preventOverflow', 'keepTogether', 'arrow', 'flip', 'applyStyle'],
+        // 忽略的modifier
         modifiersIgnored: [],
-
+        // popper会自动调整按照fixed方式还是absolute方式定位，若设置改值为true则用absolute替代fixed。
         forceAbsolute: false
     };
 
     /**
      * Create a new Popper.js instance
      * @constructor Popper
+     * 定位popper
      * @param {HTMLElement} reference - The reference element used to position the popper
      * @param {HTMLElement|Object} popper
      *      The HTML element used as popper, or a configuration used to generate the popper.
@@ -91,12 +100,14 @@
      * @param {Array} [popper.classNames=['popper']] Array of classes to apply to the generated popper.
      * @param {Array} [popper.attributes] Array of attributes to apply, specify `attr:value` to assign a value to it.
      * @param {HTMLElement|String} [popper.parent=window.document.body] The parent element, given as HTMLElement or as query string.
+     * 可为html或文本或node节点
      * @param {String} [popper.content=''] The content of the popper, it can be text, html, or node; if it is not text, set `contentType` to `html` or `node`.
      * @param {String} [popper.contentType='text'] If `html`, the `content` will be parsed as HTML. If `node`, it will be appended as-is.
      * @param {String} [popper.arrowTagName='div'] Same as `popper.tagName` but for the arrow element.
      * @param {Array} [popper.arrowClassNames='popper__arrow'] Same as `popper.classNames` but for the arrow element.
      * @param {String} [popper.arrowAttributes=['x-arrow']] Same as `popper.attributes` but for the arrow element.
      * @param {Object} options
+     * popper 放置的位置 
      * @param {String} [options.placement=bottom]
      *      Placement of the popper accepted values: `top(-start, -end), right(-start, -end), bottom(-start, -right),
      *      left(-start, -end)`
@@ -147,6 +158,7 @@
      *      Set to true if you want to automatically remove the popper when you call the `destroy` method.
      */
     function Popper(reference, popper, options) {
+        //获取对应的dom元素
         this._reference = reference.jquery ? reference[0] : reference;
         this.state = {};
 
@@ -166,13 +178,14 @@
         this._options = Object.assign({}, DEFAULTS, options);
 
         // refactoring modifiers' list
-        this._options.modifiers = this._options.modifiers.map(function(modifier){
+        this._options.modifiers = this._options.modifiers.map(function(modifier) {
             // remove ignored modifiers
             if (this._options.modifiersIgnored.indexOf(modifier) !== -1) return;
 
             // set the x-placement attribute before everything else because it could be used to add margins to the popper
             // margins needs to be calculated to get the correct popper offsets
             if (modifier === 'applyStyle') {
+                // 为了能正确的计算popper的偏移所以，需要将x-placement提到最前。
                 this._popper.setAttribute('x-placement', this._options.placement);
             }
 
@@ -197,7 +210,7 @@
     // Methods
     //
     /**
-     * Destroy the popper
+     * Destroy the popper  删除popper的属性和事件绑定，removeOnDestroy为true则删除popperDom
      * @method
      * @memberof Popper
      */
@@ -234,9 +247,9 @@
 
         // get boundaries
         data.boundaries = this._getBoundaries(data, this._options.boundariesPadding, this._options.boundariesElement);
-
+        // 执行所有modifiers
         data = this.runModifiers(data, this._options.modifiers);
-
+        // 执行自定义更新回调
         if (typeof this.state.updateCallback === 'function') {
             this.state.updateCallback(data);
         }
@@ -248,6 +261,7 @@
      * @memberof Popper
      * @param {Function} callback
      */
+    // 初始化回调
     Popper.prototype.onCreate = function(callback) {
         // the createCallbacks return as first argument the popper instance
         callback(this);
@@ -269,6 +283,7 @@
 
     /**
      * Helper used to generate poppers from a configuration file
+     * 根据配置生成popper的dom结构，并添加值定义的paren中。
      * @method
      * @memberof Popper
      * @param config {Object} configuration
@@ -277,14 +292,14 @@
     Popper.prototype.parse = function(config) {
         var defaultConfig = {
             tagName: 'div',
-            classNames: [ 'popper' ],
+            classNames: ['popper'],
             attributes: [],
             parent: root.document.body,
             content: '',
             contentType: 'text',
             arrowTagName: 'div',
-            arrowClassNames: [ 'popper__arrow' ],
-            arrowAttributes: [ 'x-arrow']
+            arrowClassNames: ['popper__arrow'],
+            arrowAttributes: ['x-arrow']
         };
         config = Object.assign({}, defaultConfig, config);
 
@@ -293,9 +308,10 @@
         var popper = d.createElement(config.tagName);
         addClassNames(popper, config.classNames);
         addAttributes(popper, config.attributes);
+        // 根据配置contentType进行不同渲染，文本、节点、html。
         if (config.contentType === 'node') {
             popper.appendChild(config.content.jquery ? config.content[0] : config.content);
-        }else if (config.contentType === 'html') {
+        } else if (config.contentType === 'html') {
             popper.innerHTML = config.content;
         } else {
             popper.textContent = config.content;
@@ -417,6 +433,7 @@
         //
 
         // depending by the popper placement we have to compute its offsets slightly differently
+        // popper总在reference居中位置显示。
         if (['right', 'left'].indexOf(placement) !== -1) {
             popperOffsets.top = referenceOffsets.top + referenceOffsets.height / 2 - popperRect.height / 2;
             if (placement === 'left') {
@@ -434,8 +451,8 @@
         }
 
         // Add width and height to our offsets object
-        popperOffsets.width   = popperRect.width;
-        popperOffsets.height  = popperRect.height;
+        popperOffsets.width = popperRect.width;
+        popperOffsets.height = popperRect.height;
 
         return {
             popper: popperOffsets,
@@ -446,6 +463,7 @@
 
     /**
      * Setup needed event listeners used to update the popper position
+     * 监听scroll和resize事件，回调update。
      * @method
      * @memberof Popper
      * @access private
@@ -500,8 +518,8 @@
             var body = root.document.body,
                 html = root.document.documentElement;
 
-            height = Math.max( body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight );
-            width = Math.max( body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth );
+            height = Math.max(body.scrollHeight, body.offsetHeight, html.clientHeight, html.scrollHeight, html.offsetHeight);
+            width = Math.max(body.scrollWidth, body.offsetWidth, html.clientWidth, html.scrollWidth, html.offsetWidth);
 
             boundaries = {
                 top: 0,
@@ -515,10 +533,10 @@
             var offsetParentRect = getOffsetRect(offsetParent);
 
             // Thanks the fucking native API, `document.body.scrollTop` & `document.documentElement.scrollTop`
-            var getScrollTopValue = function (element) {
+            var getScrollTopValue = function(element) {
                 return element == document.body ? Math.max(document.documentElement.scrollTop, document.body.scrollTop) : element.scrollTop;
             }
-            var getScrollLeftValue = function (element) {
+            var getScrollLeftValue = function(element) {
                 return element == document.body ? Math.max(document.documentElement.scrollLeft, document.body.scrollLeft) : element.scrollLeft;
             }
 
@@ -618,6 +636,7 @@
         };
 
         // round top and left to avoid blurry text
+        // 舍去精度来防止文字模糊
         var left = Math.round(data.offsets.popper.left);
         var top = Math.round(data.offsets.popper.top);
 
@@ -631,7 +650,7 @@
         }
         // othwerise, we use the standard `left` and `top` properties
         else {
-            styles.left =left;
+            styles.left = left;
             styles.top = top;
         }
 
@@ -646,7 +665,7 @@
         // set an attribute which will be useful to style the tooltip (use it to properly position its arrow)
         // NOTE: 1 DOM access here
         this._popper.setAttribute('x-placement', data.placement);
-
+        // arrowModifier在aapplyStyleModifier之前调用则将设置arrowStyle。
         // if the arrow modifier is required and the arrow style has been computed, apply the arrow style
         if (this.isModifierRequired(this.modifiers.applyStyle, this.modifiers.arrow) && data.offsets.arrow) {
             setStyle(data.arrowElement, data.offsets.arrow);
@@ -659,7 +678,7 @@
      * Modifier used to shift the popper on the start or end of its reference element side
      * @method
      * @memberof Popper.modifiers
-     * @argument {Object} data - The data object generated by `update` method
+     * @argument {Object} data - The data object generated by `update` method 
      * @returns {Object} The data object, properly modified
      */
     Popper.prototype.modifiers.shift = function(data) {
@@ -674,12 +693,12 @@
 
             var shiftOffsets = {
                 y: {
-                    start:  { top: reference.top },
-                    end:    { top: reference.top + reference.height - popper.height }
+                    start: { top: reference.top },
+                    end: { top: reference.top + reference.height - popper.height }
                 },
                 x: {
-                    start:  { left: reference.left },
-                    end:    { left: reference.left + reference.width - popper.width }
+                    start: { left: reference.left },
+                    end: { left: reference.left + reference.width - popper.width }
                 }
             };
 
@@ -694,6 +713,7 @@
 
     /**
      * Modifier used to make sure the popper does not overflows from it's boundaries
+     * 溢出时进行调整位置。
      * @method
      * @memberof Popper.modifiers
      * @argument {Object} data - The data object generated by `update` method
@@ -749,7 +769,7 @@
      * @returns {Object} The data object, properly modified
      */
     Popper.prototype.modifiers.keepTogether = function(data) {
-        var popper  = getPopperClientRect(data.offsets.popper);
+        var popper = getPopperClientRect(data.offsets.popper);
         var reference = data.offsets.reference;
         var f = Math.floor;
 
@@ -773,6 +793,7 @@
      * Modifier used to flip the placement of the popper when the latter is starting overlapping its reference element.
      * Requires the `preventOverflow` modifier before it in order to work.
      * **NOTE:** This modifier will run all its previous modifiers everytime it tries to flip the popper!
+     * 会将flipModifier之前的modifier执行一遍。
      * @method
      * @memberof Popper.modifiers
      * @argument {Object} data - The data object generated by _update method
@@ -785,7 +806,7 @@
             console.warn('WARNING: preventOverflow modifier is required by flip modifier in order to work, be sure to include it before flip!');
             return data;
         }
-
+        // 没有空间时直接返回。
         if (data.flipped && data.placement === data._originalPlacement) {
             // seems like flip is trying to loop, probably there's not enough space on any of the flippable sides
             return data;
@@ -796,7 +817,7 @@
         var variation = data.placement.split('-')[1] || '';
 
         var flipOrder = [];
-        if(this._options.flipBehavior === 'flip') {
+        if (this._options.flipBehavior === 'flip') {
             flipOrder = [
                 placement,
                 placementOpposite
@@ -848,18 +869,15 @@
      */
     Popper.prototype.modifiers.offset = function(data) {
         var offset = this._options.offset;
-        var popper  = data.offsets.popper;
+        var popper = data.offsets.popper;
 
         if (data.placement.indexOf('left') !== -1) {
             popper.top -= offset;
-        }
-        else if (data.placement.indexOf('right') !== -1) {
+        } else if (data.placement.indexOf('right') !== -1) {
             popper.top += offset;
-        }
-        else if (data.placement.indexOf('top') !== -1) {
+        } else if (data.placement.indexOf('top') !== -1) {
             popper.left -= offset;
-        }
-        else if (data.placement.indexOf('bottom') !== -1) {
+        } else if (data.placement.indexOf('bottom') !== -1) {
             popper.left += offset;
         }
         return data;
@@ -874,7 +892,7 @@
      * @returns {Object} The data object, properly modified
      */
     Popper.prototype.modifiers.arrow = function(data) {
-        var arrow  = this._options.arrowElement;
+        var arrow = this._options.arrowElement;
         var arrowOffset = this._options.arrowOffset;
 
         // if the arrowElement is a string, suppose it's a CSS selector
@@ -894,23 +912,24 @@
         }
 
         // arrow depends on keepTogether in order to work
+        // 赖于 keepTogetherModifier
         if (!this.isModifierRequired(this.modifiers.arrow, this.modifiers.keepTogether)) {
             console.warn('WARNING: keepTogether modifier is required by arrow modifier in order to work, be sure to include it before arrow!');
             return data;
         }
 
-        var arrowStyle  = {};
-        var placement   = data.placement.split('-')[0];
-        var popper      = getPopperClientRect(data.offsets.popper);
-        var reference   = data.offsets.reference;
-        var isVertical  = ['left', 'right'].indexOf(placement) !== -1;
+        var arrowStyle = {};
+        var placement = data.placement.split('-')[0];
+        var popper = getPopperClientRect(data.offsets.popper);
+        var reference = data.offsets.reference;
+        var isVertical = ['left', 'right'].indexOf(placement) !== -1;
 
-        var len         = isVertical ? 'height' : 'width';
-        var side        = isVertical ? 'top' : 'left';
-        var translate   = isVertical ? 'translateY' : 'translateX';
-        var altSide     = isVertical ? 'left' : 'top';
-        var opSide      = isVertical ? 'bottom' : 'right';
-        var arrowSize   = getOuterSizes(arrow)[len];
+        var len = isVertical ? 'height' : 'width';
+        var side = isVertical ? 'top' : 'left';
+        var translate = isVertical ? 'translateY' : 'translateX';
+        var altSide = isVertical ? 'left' : 'top';
+        var opSide = isVertical ? 'bottom' : 'right';
+        var arrowSize = getOuterSizes(arrow)[len];
 
         //
         // extends keepTogether behavior making sure the popper and its reference have enough pixels in conjuction
@@ -955,8 +974,11 @@
      */
     function getOuterSizes(element) {
         // NOTE: 1 DOM access here
-        var _display = element.style.display, _visibility = element.style.visibility;
-        element.style.display = 'block'; element.style.visibility = 'hidden';
+        var _display = element.style.display,
+            // 防止重绘，先隐藏元素。
+            _visibility = element.style.visibility;
+        element.style.display = 'block';
+        element.style.visibility = 'hidden';
         var calcWidthToForceRepaint = element.offsetWidth;
 
         // original method
@@ -966,20 +988,22 @@
         var result = { width: element.offsetWidth + y, height: element.offsetHeight + x };
 
         // reset element styles
-        element.style.display = _display; element.style.visibility = _visibility;
+        element.style.display = _display;
+        element.style.visibility = _visibility;
         return result;
     }
 
     /**
      * Get the opposite placement of the given one/
+     * 取翻转位置
      * @function
      * @ignore
      * @argument {String} placement
      * @returns {String} flipped placement
      */
     function getOppositePlacement(placement) {
-        var hash = {left: 'right', right: 'left', bottom: 'top', top: 'bottom' };
-        return placement.replace(/left|right|bottom|top/g, function(matched){
+        var hash = { left: 'right', right: 'left', bottom: 'top', top: 'bottom' };
+        return placement.replace(/left|right|bottom|top/g, function(matched) {
             return hash[matched];
         });
     }
@@ -1007,7 +1031,8 @@
      * @returns index or null
      */
     function getArrayKeyIndex(arr, keyToFind) {
-        var i = 0, key;
+        var i = 0,
+            key;
         for (key in arr) {
             if (arr[key] === keyToFind) {
                 return i;
@@ -1069,13 +1094,12 @@
 
         // Firefox want us to check `-x` and `-y` variations as well
         if (
-            ['scroll', 'auto'].indexOf(getStyleComputedProperty(parent, 'overflow')) !== -1 ||
-            ['scroll', 'auto'].indexOf(getStyleComputedProperty(parent, 'overflow-x')) !== -1 ||
-            ['scroll', 'auto'].indexOf(getStyleComputedProperty(parent, 'overflow-y')) !== -1
+            ['scroll', 'auto'].indexOf(getStyleComputedProperty(parent, 'overflow')) !== -1 || ['scroll', 'auto'].indexOf(getStyleComputedProperty(parent, 'overflow-x')) !== -1 || ['scroll', 'auto'].indexOf(getStyleComputedProperty(parent, 'overflow-y')) !== -1
         ) {
             // If the detected scrollParent is body, we perform an additional check on its parentNode
             // in this way we'll get body if the browser is Chrome-ish, or documentElement otherwise
             // fixes issue #65
+            // chrome或获取到body而其他浏览器获取的是documentElement.
             return parent;
         }
         return getScrollParent(element.parentNode);
@@ -1113,6 +1137,7 @@
         Object.keys(styles).forEach(function(prop) {
             var unit = '';
             // add unit if the value is numeric and is one of the following
+            // 注意这里默认的单位是px。
             if (['width', 'height', 'top', 'right', 'bottom', 'left'].indexOf(prop) !== -1 && is_numeric(styles[prop])) {
                 unit = 'px';
             }
@@ -1168,9 +1193,9 @@
         var isIE = navigator.userAgent.indexOf("MSIE") != -1;
 
         // fix ie document bounding top always 0 bug
-        var rectTop = isIE && element.tagName === 'HTML'
-            ? -element.scrollTop
-            : rect.top;
+        var rectTop = isIE && element.tagName === 'HTML' ?
+            -element.scrollTop :
+            rect.top;
 
         return {
             left: rect.left,
@@ -1203,8 +1228,8 @@
         }
 
         var rect = {
-            top: elementRect.top - parentRect.top ,
-            left: elementRect.left - parentRect.left ,
+            top: elementRect.top - parentRect.top,
+            left: elementRect.left - parentRect.left,
             bottom: (elementRect.top - parentRect.top) + elementRect.height,
             right: (elementRect.left - parentRect.left) + elementRect.width,
             width: elementRect.width,

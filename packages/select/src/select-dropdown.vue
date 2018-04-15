@@ -51,6 +51,7 @@
     },
 
     computed: {
+      // 弹出菜单的自定义类名
       popperClass() {
         return this.$parent.popperClass;
       }
