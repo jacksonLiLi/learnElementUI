@@ -10,7 +10,7 @@
 <script type="text/babel">
   import Popper from 'element-ui/src/utils/vue-popper';
 
-  export default {
+  export default {  
     name: 'ElSelectDropdown',
 
     componentName: 'ElSelectDropdown',

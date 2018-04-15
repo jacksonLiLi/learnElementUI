@@ -61,6 +61,7 @@ const PopupManager = {
         if (!topItem) return;
 
         const instance = PopupManager.getInstance(topItem.id);
+        // 点击遮罩层关闭modal
         if (instance && instance.closeOnClickModal) {
             instance.close();
         }
@@ -167,7 +168,7 @@ if (!Vue.prototype.$isServer) {
     window.addEventListener('keydown', function(event) {
         if (event.keyCode === 27) {
             const topPopup = getTopPopup();
-
+            // 按esc关闭最顶部modal
             if (topPopup && topPopup.closeOnPressEscape) {
                 topPopup.handleClose ?
                     topPopup.handleClose() :
