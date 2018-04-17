@@ -155,7 +155,7 @@ export default {
             }
 
             const props = merge({}, this.$props || this, options);
-
+            // TODO: 这里测试下
             if (this._closeTimer) {
                 clearTimeout(this._closeTimer);
                 this._closeTimer = null;
@@ -195,6 +195,7 @@ export default {
                     this._closing = false;
                 }
                 PopupManager.openModal(this._popupId, PopupManager.nextZIndex(), this.modalAppendToBody ? undefined : dom, props.modalClass, props.modalFade);
+                // TODO: 脑补不到呀，待会测试下。
                 if (props.lockScroll) {
                     if (!this.bodyOverflow) {
                         this.bodyPaddingRight = document.body.style.paddingRight;

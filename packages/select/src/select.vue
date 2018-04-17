@@ -132,6 +132,7 @@
 <script type="text/babel">
   import Emitter from 'element-ui/src/mixins/emitter';
   import Focus from 'element-ui/src/mixins/focus';
+  // em...我还是把vue-i18n的源码也看一遍写下注释和流程图吧
   import Locale from 'element-ui/src/mixins/locale';
   import ElInput from 'element-ui/packages/input';
   import ElSelectMenu from './select-dropdown.vue';

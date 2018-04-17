@@ -10,7 +10,7 @@
       'hover': hover
     }">
     <slot>
-      <span>{{ currentLabel }}</span>
+      <span>{{ currentLabel }}李志雄</span>
     </slot>
   </li>
 </template>

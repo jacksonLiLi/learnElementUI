@@ -7,7 +7,9 @@ const format = Format(Vue);
 let lang = defaultLang;
 let merged = false;
 let i18nHandler = function() {
+  // 若使用了vue-i18n 则调用$t并返回匹配中内容。
   const vuei18n = Object.getPrototypeOf(this || Vue).$t;
+  // 配置vue-i18n
   if (typeof vuei18n === 'function' && !!Vue.locale) {
     if (!merged) {
       merged = true;
@@ -21,6 +23,7 @@ let i18nHandler = function() {
 };
 
 export const t = function(path, options) {
+  // 若使用了vue-i18n 则会匹配出内容.
   let value = i18nHandler.apply(this, arguments);
   if (value !== null && value !== undefined) return value;
 

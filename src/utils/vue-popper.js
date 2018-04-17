@@ -100,7 +100,7 @@ export default {
             // 显式调用destroy则执行destroy
             if (this.popperJS && this.popperJS.destroy) {
                 this.popperJS.destroy();
-            }
+            } 
 
             options.placement = this.currentPlacement;
             options.offset = this.offset;

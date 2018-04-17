@@ -58,12 +58,14 @@
     },
 
     watch: {
+      // 咦...这里不会耦合吗，emit不好吗
       '$parent.inputWidth'() {
         this.minWidth = this.$parent.$el.getBoundingClientRect().width + 'px';
       }
     },
 
     mounted() {
+      // 为popper设定reference（定位依据）和popper自身
       this.referenceElm = this.$parent.$refs.reference.$el;
       this.$parent.popperElm = this.popperElm = this.$el;
       this.$on('updatePopper', () => {
